@@ -253,6 +253,34 @@ If your plugin does not need CSS, delete this file.
   margin-bottom: 8px;
 }
 
+.chat-message-user {
+  align-self: flex-end;
+  text-align: right;
+}
+
+.chat-message-user .message-content {
+  max-width: 100%;
+  margin-left: auto;
+}
+
+.chat-message-user .message-buttons-wrapper {
+  justify-content: flex-end;
+}
+
+.chat-message-sender {
+  align-self: flex-start;
+  text-align: left;
+}
+
+.chat-message-sender .message-content {
+  max-width: 80%;
+}
+
+.chat-message-sender .message-buttons-wrapper {
+  justify-content: flex-start;
+}
+
+/*
 .message {
   display: flex;
   padding: 0;
@@ -260,6 +288,7 @@ If your plugin does not need CSS, delete this file.
   position: relative;
   margin-bottom: 0;
 }
+*/
 
 .message-icon {
   width: 24px;
@@ -608,3 +637,4 @@ If your plugin does not need CSS, delete this file.
   margin-left: 20px;
   margin-top: 5px;
 }
+

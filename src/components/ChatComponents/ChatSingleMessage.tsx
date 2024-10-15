@@ -118,7 +118,7 @@ const ChatSingleMessage: React.FC<ChatSingleMessageProps> = ({
   };
 
   return (
-    <div className={`chat-message ${message.sender.toLowerCase()}`}>
+    <div className={`chat-message-${message.sender.toLowerCase()}`}>
       <div className="message-content">
         <div className="message-text">
           {message.sender === USER_SENDER && isEditing ? (
