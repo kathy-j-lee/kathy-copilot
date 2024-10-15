@@ -57,11 +57,30 @@ If your plugin does not need CSS, delete this file.
   width: 70%;
 }
 
+/* chat elements */
+.header {
+  color: #ff00ff; /* Neon pink color */
+  font-weight: bold;
+  text-align: center; /* Center the text */
+  padding: 10px; /* Add some padding for spacing */
+}
+
+.top-container {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-end;
+  width: 100%;
+  flex: 0 0 auto;
+  box-sizing: border-box;
+}
+
 .chat-container {
   display: flex;
   flex-direction: column;
   width: 100%;
   height: 100%;
+  background-color: #fff;
   overflow: hidden; /* Fix overflow and can't scroll up */
 }
 

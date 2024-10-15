@@ -3,6 +3,7 @@ import { useAIState } from "@/aiState";
 import { updateChatMemory } from "@/chatUtils";
 import ChatIcons from "@/components/ChatComponents/ChatIcons";
 import ChatInput from "@/components/ChatComponents/ChatInput";
+import ChatInputTop from "@/components/ChatComponents/ChatInputTop";
 import ChatMessages from "@/components/ChatComponents/ChatMessages";
 import { ABORT_REASON, AI_SENDER, EVENT_NAMES, USER_SENDER } from "@/constants";
 import { AppContext } from "@/context";
@@ -32,12 +33,14 @@ import {
 import { MarkdownView, Notice, TFile } from "obsidian";
 import React, { useContext, useEffect, useState } from "react";
 
+// Interface for options used in createEffect function
 interface CreateEffectOptions {
   custom_temperature?: number;
   isVisible?: boolean;
   ignoreSystemMessage?: boolean;
 }
 
+// Interface for Chat component props
 interface ChatProps {
   sharedState: SharedState;
   settings: CopilotSettings;
@@ -50,6 +53,7 @@ interface ChatProps {
   debug: boolean;
 }
 
+// Main Chat component
 const Chat: React.FC<ChatProps> = ({
   sharedState,
   settings,
@@ -61,6 +65,7 @@ const Chat: React.FC<ChatProps> = ({
   plugin,
   debug,
 }) => {
+  // State hooks for managing chat state
   const [chatHistory, addMessage, clearMessages] = useSharedState(sharedState);
   const [currentModelKey, setModelKey, currentChain, setChain, clearChatMemory] =
     useAIState(chainManager);
@@ -71,6 +76,7 @@ const Chat: React.FC<ChatProps> = ({
   const [historyIndex, setHistoryIndex] = useState(-1);
   const [chatIsVisible, setChatIsVisible] = useState(false);
 
+  // Effect to handle chat visibility
   useEffect(() => {
     const handleChatVisibility = (evt: CustomEvent<{ chatIsVisible: boolean }>) => {
       setChatIsVisible(evt.detail.chatIsVisible);
@@ -83,8 +89,10 @@ const Chat: React.FC<ChatProps> = ({
     };
   }, []);
 
+  // Context for accessing the app instance
   const app = plugin.app || useContext(AppContext);
 
+  // Function to handle sending a message
   const handleSendMessage = async () => {
     if (!inputMessage) return;
 
@@ -135,6 +143,7 @@ const Chat: React.FC<ChatProps> = ({
     setLoading(false);
   };
 
+  // Function to navigate through message history
   const navigateHistory = (direction: "up" | "down"): string => {
     const history = plugin.userMessageHistory;
     if (direction === "up" && historyIndex < history.length - 1) {
@@ -147,6 +156,7 @@ const Chat: React.FC<ChatProps> = ({
     return inputMessage;
   };
 
+  // Function to save chat as a note
   const handleSaveAsNote = async (openNote = false) => {
     if (!app) {
       console.error("App instance is not available.");
@@ -236,6 +246,7 @@ ${chatContent}`;
     }
   };
 
+  // Function to refresh the vault context
   const refreshVaultContext = async () => {
     if (!app) {
       console.error("App instance is not available.");
@@ -251,10 +262,12 @@ ${chatContent}`;
     }
   };
 
+  // Function to clear the current AI message
   const clearCurrentAiMessage = () => {
     setCurrentAiMessage("");
   };
 
+  // Function to stop generating a response
   const handleStopGenerating = (reason?: ABORT_REASON) => {
     if (abortController) {
       if (plugin.settings.debug) {
@@ -265,6 +278,7 @@ ${chatContent}`;
     }
   };
 
+  // Function to regenerate a message
   const handleRegenerate = async (messageIndex: number) => {
     const lastUserMessageIndex = messageIndex - 1;
 
@@ -313,6 +327,7 @@ ${chatContent}`;
     }
   };
 
+  // Function to edit a message
   const handleEdit = async (messageIndex: number, newMessage: string) => {
     const oldMessage = chatHistory[messageIndex].message;
 
@@ -338,6 +353,7 @@ ${chatContent}`;
     }
   };
 
+  // Effect to handle token counting on selection
   useEffect(() => {
     async function handleSelection(event: CustomEvent) {
       const wordCount = event.detail.selectedText.split(" ").length;
@@ -359,7 +375,7 @@ ${chatContent}`;
     };
   }, []);
 
-  // Create an effect for each event type (Copilot command on selected text)
+  // Function to create an effect for each event type (Copilot command on selected text)
   const createEffect = (
     eventType: string,
     promptFn: (selectedText: string, eventSubtype?: string) => string | Promise<string>,
@@ -411,6 +427,7 @@ ${chatContent}`;
     };
   };
 
+  // Effects for various selection-based commands
   useEffect(createEffect("fixGrammarSpellingSelection", fixGrammarSpellingSelectionPrompt), []);
   useEffect(createEffect("summarizeSelection", summarizePrompt), []);
   useEffect(createEffect("tocSelection", tocPrompt), []);
@@ -445,6 +462,7 @@ ${chatContent}`;
     []
   );
 
+  // Custom prompt processor effect
   const customPromptProcessor = CustomPromptProcessor.getInstance(app.vault, settings);
   useEffect(
     createEffect(
@@ -464,6 +482,7 @@ ${chatContent}`;
     []
   );
 
+  // Ad-hoc prompt processor effect
   useEffect(
     createEffect(
       "applyAdhocPrompt",
@@ -482,6 +501,7 @@ ${chatContent}`;
     []
   );
 
+  // Function to insert a message at the cursor in the active note
   const handleInsertAtCursor = async (message: string) => {
     let leaf = app.workspace.getMostRecentLeaf();
     if (!leaf) {
@@ -512,6 +532,7 @@ ${chatContent}`;
     }
   }, [onSaveChat]);
 
+  // Function to delete a message
   const handleDelete = async (messageIndex: number) => {
     const newChatHistory = [...chatHistory];
     newChatHistory.splice(messageIndex, 1);
@@ -524,6 +545,22 @@ ${chatContent}`;
 
   return (
     <div className="chat-container">
+      <div className="header">
+      <strong>YAY GO KATHY</strong>
+    </div>
+      <div className="top-container">
+        <ChatInputTop
+            inputMessage={inputMessage}
+            setInputMessage={setInputMessage}
+            handleSendMessage={handleSendMessage}
+            isGenerating={loading}
+            onStopGenerating={() => handleStopGenerating(ABORT_REASON.USER_STOPPED)}
+            app={app}
+            settings={settings}
+            navigateHistory={navigateHistory}
+            chatIsVisible={chatIsVisible}
+          />
+        </div>
       <ChatMessages
         chatHistory={chatHistory}
         currentAiMessage={currentAiMessage}
@@ -535,6 +572,7 @@ ${chatContent}`;
         onDelete={handleDelete}
       />
       <div className="bottom-container">
+        {/* ChatIcons component for chat controls */}
         <ChatIcons
           currentModelKey={currentModelKey}
           setCurrentModelKey={setModelKey}
@@ -560,6 +598,7 @@ ${chatContent}`;
           vault_qa_strategy={plugin.settings.indexVaultToVectorStore}
           debug={debug}
         />
+        {/* ChatInput component for user input */}
         <ChatInput
           inputMessage={inputMessage}
           setInputMessage={setInputMessage}
