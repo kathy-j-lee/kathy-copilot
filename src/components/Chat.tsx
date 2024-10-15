@@ -70,7 +70,8 @@ const Chat: React.FC<ChatProps> = ({
   const [currentModelKey, setModelKey, currentChain, setChain, clearChatMemory] =
     useAIState(chainManager);
   const [currentAiMessage, setCurrentAiMessage] = useState("");
-  const [inputMessage, setInputMessage] = useState("");
+  const [inputMessageTop, setInputMessageTop] = useState(""); // Separate state for ChatInputTop
+  const [inputMessageBottom, setInputMessageBottom] = useState(""); // Separate state for ChatInput
   const [abortController, setAbortController] = useState<AbortController | null>(null);
   const [loading, setLoading] = useState(false);
   const [historyIndex, setHistoryIndex] = useState(-1);
@@ -94,11 +95,11 @@ const Chat: React.FC<ChatProps> = ({
 
   // Function to handle sending a message
   const handleSendMessage = async () => {
-    if (!inputMessage) return;
+    if (!inputMessageTop && !inputMessageBottom) return;
 
     const customPromptProcessor = CustomPromptProcessor.getInstance(app.vault, settings);
     const processedUserMessage = await customPromptProcessor.processCustomPrompt(
-      inputMessage,
+      inputMessageTop || inputMessageBottom,
       "",
       app.workspace.getActiveFile() as TFile | undefined
     );
@@ -106,7 +107,7 @@ const Chat: React.FC<ChatProps> = ({
     const timestamp = formatDateTime(new Date());
 
     const userMessage: ChatMessage = {
-      message: inputMessage,
+      message: inputMessageTop || inputMessageBottom,
       sender: USER_SENDER,
       isVisible: true,
       timestamp: timestamp,
@@ -124,11 +125,11 @@ const Chat: React.FC<ChatProps> = ({
     addMessage(promptMessageHidden);
 
     // Add to user message history
-    updateUserMessageHistory(inputMessage);
+    updateUserMessageHistory(inputMessageTop || inputMessageBottom);
     setHistoryIndex(-1);
 
     // Clear input
-    setInputMessage("");
+    setInputMessageBottom("");
 
     // Display running dots to indicate loading
     setLoading(true);
@@ -153,7 +154,7 @@ const Chat: React.FC<ChatProps> = ({
       setHistoryIndex(historyIndex - 1);
       return historyIndex === 0 ? "" : history[history.length - 1 - historyIndex + 1];
     }
-    return inputMessage;
+    return inputMessageTop || inputMessageBottom;
   };
 
   // Function to save chat as a note
@@ -550,8 +551,8 @@ ${chatContent}`;
     </div>
       <div className="top-container">
         <ChatInputTop
-            inputMessage={inputMessage}
-            setInputMessage={setInputMessage}
+            inputMessage={inputMessageTop}
+            setInputMessage={setInputMessageTop}
             handleSendMessage={handleSendMessage}
             isGenerating={loading}
             onStopGenerating={() => handleStopGenerating(ABORT_REASON.USER_STOPPED)}
@@ -560,20 +561,8 @@ ${chatContent}`;
             navigateHistory={navigateHistory}
             chatIsVisible={chatIsVisible}
           />
-        </div>
-      <ChatMessages
-        chatHistory={chatHistory}
-        currentAiMessage={currentAiMessage}
-        loading={loading}
-        app={app}
-        onInsertAtCursor={handleInsertAtCursor}
-        onRegenerate={handleRegenerate}
-        onEdit={handleEdit}
-        onDelete={handleDelete}
-      />
-      <div className="bottom-container">
-        {/* ChatIcons component for chat controls */}
-        <ChatIcons
+                {/* ChatIcons component for chat controls */}
+                <ChatIcons
           currentModelKey={currentModelKey}
           setCurrentModelKey={setModelKey}
           currentChain={currentChain}
@@ -598,10 +587,23 @@ ${chatContent}`;
           vault_qa_strategy={plugin.settings.indexVaultToVectorStore}
           debug={debug}
         />
+        </div>
+      <ChatMessages
+        chatHistory={chatHistory}
+        currentAiMessage={currentAiMessage}
+        loading={loading}
+        app={app}
+        onInsertAtCursor={handleInsertAtCursor}
+        onRegenerate={handleRegenerate}
+        onEdit={handleEdit}
+        onDelete={handleDelete}
+      />
+      <div className="bottom-container">
+
         {/* ChatInput component for user input */}
         <ChatInput
-          inputMessage={inputMessage}
-          setInputMessage={setInputMessage}
+          inputMessage={inputMessageBottom}
+          setInputMessage={setInputMessageBottom}
           handleSendMessage={handleSendMessage}
           isGenerating={loading}
           onStopGenerating={() => handleStopGenerating(ABORT_REASON.USER_STOPPED)}
