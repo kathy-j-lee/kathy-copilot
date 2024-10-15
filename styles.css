@@ -96,11 +96,11 @@ If your plugin does not need CSS, delete this file.
 
 .chat-icons-container {
   display: flex;
-  justify-content: center;
+  justify-content: left;
   align-items: center;
   width: 100%;
   padding: 8px 8px 0;
-  order: 1;
+  order: 2;
   gap: 8px;
   flex-wrap: wrap;
 }
@@ -157,7 +157,7 @@ If your plugin does not need CSS, delete this file.
   box-sizing: border-box;
   flex-grow: 1;
   width: 100%;
-  order: 2;
+  order: 1;
   position: relative;
 }
 
@@ -181,6 +181,44 @@ If your plugin does not need CSS, delete this file.
 }
 
 .chat-input-container button {
+  position: absolute;
+  right: 22px;
+  bottom: 31px;
+  padding: 8px;
+  margin: 0;
+  z-index: 1;
+}
+
+.chat-top-input-container {
+  display: flex;
+  padding: 8px;
+  box-sizing: border-box;
+  flex-grow: 1;
+  width: 100%;
+  order: 2;
+  position: relative;
+}
+
+.chat-top-input-container textarea {
+  width: 100%;
+  margin-right: 0;
+  margin-bottom: 8px;
+  resize: none;
+  overflow: auto;
+  min-height: 60px;
+  max-height: 200px;
+  box-sizing: border-box;
+  border: 1px solid gray;
+  border-radius: 10px;
+  padding: 15px 60px 15px 15px;
+}
+
+.chat-top-input-container textarea::placeholder {
+  color: var(--inline-title-color);
+  opacity: 0.5;
+}
+
+.chat-top-input-container button {
   position: absolute;
   right: 22px;
   bottom: 31px;
