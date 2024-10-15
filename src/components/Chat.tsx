@@ -596,6 +596,8 @@ ${chatContent}`;
             clearMessages();
             clearChatMemory();
             clearCurrentAiMessage();
+            setInputMessageTop(""); // Explicitly clear the top input box
+            setInputMessageBottom(""); // Explicitly clear the bottom input box
           }}
           onRefreshVaultContext={refreshVaultContext}
           onFindSimilarNotes={(content, activeFilePath) =>

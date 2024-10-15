@@ -1,7 +1,6 @@
-import { ChatButtons } from "@/components/ChatComponents/ChatButtons";
-import { BotIcon, UserIcon } from "@/components/Icons";
-import { USER_SENDER } from "@/constants";
 import { ChatMessage } from "@/sharedState";
+import { ChatButtons } from "@/components/ChatComponents/ChatButtons";
+import { USER_SENDER } from "@/constants";
 import { App, Component, MarkdownRenderer } from "obsidian";
 import React, { useEffect, useRef, useState } from "react";
 
@@ -119,46 +118,40 @@ const ChatSingleMessage: React.FC<ChatSingleMessageProps> = ({
   };
 
   return (
-    <div className="chat-message-container">
-      <div className={`message ${message.sender === USER_SENDER ? "user-message" : "bot-message"}`}>
-        <div className="message-icon">
-          {message.sender === USER_SENDER ? <UserIcon /> : <BotIcon />}
-        </div>
-        <div className="message-content-wrapper">
-          <div className="message-content">
-            {message.sender === USER_SENDER && isEditing ? (
-              <textarea
-                ref={textareaRef}
-                value={editedMessage}
-                onChange={handleTextareaChange}
-                onKeyDown={handleKeyDown}
-                onBlur={handleSaveEdit}
-                autoFocus
-                className="edit-textarea"
-              />
-            ) : message.sender === USER_SENDER ? (
-              <span>{message.message}</span>
-            ) : (
-              <div ref={contentRef}></div>
-            )}
-          </div>
-
-          {!isStreaming && (
-            <div className="message-buttons-wrapper">
-              <div className="message-timestamp">{message.timestamp?.display}</div>
-              <ChatButtons
-                message={message}
-                onCopy={copyToClipboard}
-                isCopied={isCopied}
-                onInsertAtCursor={onInsertAtCursor}
-                onRegenerate={onRegenerate}
-                onEdit={handleEdit}
-                onDelete={onDelete}
-              />
-            </div>
+    <div className={`chat-message ${message.sender.toLowerCase()}`}>
+      <div className="message-content">
+        <div className="message-text">
+          {message.sender === USER_SENDER && isEditing ? (
+            <textarea
+              ref={textareaRef}
+              value={editedMessage}
+              onChange={handleTextareaChange}
+              onKeyDown={handleKeyDown}
+              onBlur={handleSaveEdit}
+              autoFocus
+              className="edit-textarea"
+            />
+          ) : message.sender === USER_SENDER ? (
+            <span>{message.message}</span>
+          ) : (
+            <div ref={contentRef}></div>
           )}
         </div>
       </div>
+      {!isStreaming && (
+        <div className="message-buttons-wrapper">
+          <div className="message-timestamp">{message.timestamp?.display}</div>
+          <ChatButtons
+            message={message}
+            onCopy={copyToClipboard}
+            isCopied={isCopied}
+            onInsertAtCursor={onInsertAtCursor}
+            onRegenerate={onRegenerate}
+            onEdit={handleEdit}
+            onDelete={onDelete}
+          />
+        </div>
+      )}
     </div>
   );
 };
