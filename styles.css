@@ -253,31 +253,69 @@ If your plugin does not need CSS, delete this file.
   margin-bottom: 8px;
 }
 
+.chat-message-user,
+.chat-message-ai {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 16px;
+  width: 100%;
+}
+
 .chat-message-user {
-  align-self: flex-end;
-  text-align: right;
+  align-items: flex-end;
+}
+
+.chat-message-ai {
+  align-items: flex-start;
+}
+
+.message-content {
+  max-width: 100%;
+  padding: 8px 12px;
+  border-radius: 12px;
+  margin-bottom: 4px;
 }
 
 .chat-message-user .message-content {
-  max-width: 100%;
-  margin-left: auto;
+  background-color: hsla(var(--interactive-accent-hsl), 0.7);
+  color: var(--text-on-accent);
+}
+
+.chat-message-ai .message-content {
+  background-color: var(--background-secondary);
+}
+
+.message-buttons-wrapper {
+  display: flex;
+  width: 100%;
 }
 
 .chat-message-user .message-buttons-wrapper {
   justify-content: flex-end;
 }
 
-.chat-message-sender {
-  align-self: flex-start;
-  text-align: left;
-}
-
-.chat-message-sender .message-content {
-  max-width: 80%;
-}
-
-.chat-message-sender .message-buttons-wrapper {
+.chat-message-ai .message-buttons-wrapper {
   justify-content: flex-start;
+}
+
+.chat-message-user .edit-textarea,
+.chat-message-ai .edit-textarea {
+  width: 100%;
+  min-height: 40px;
+  padding: 8px;
+  font-size: 14px;
+  line-height: 1.5;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 4px;
+  resize: vertical;
+  background-color: var(--background-primary);
+  color: var(--text-normal);
+}
+
+.chat-message-user .edit-textarea:focus,
+.chat-message-ai .edit-textarea:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--interactive-accent);
 }
 
 /*
@@ -637,4 +675,9 @@ If your plugin does not need CSS, delete this file.
   margin-left: 20px;
   margin-top: 5px;
 }
+
+
+
+
+
 

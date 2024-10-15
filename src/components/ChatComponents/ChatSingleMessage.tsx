@@ -140,7 +140,6 @@ const ChatSingleMessage: React.FC<ChatSingleMessageProps> = ({
       </div>
       {!isStreaming && (
         <div className="message-buttons-wrapper">
-          <div className="message-timestamp">{message.timestamp?.display}</div>
           <ChatButtons
             message={message}
             onCopy={copyToClipboard}
