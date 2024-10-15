@@ -2,7 +2,7 @@ import ChainManager from "@/LLMProviders/chainManager";
 import { useAIState } from "@/aiState";
 import { updateChatMemory } from "@/chatUtils";
 import ChatSessionIcons from "@/components/ChatComponents/ChatSessionIcons";
-import ChatInput from "@/components/ChatComponents/ChatInput";
+import ChatInputFollowup from "@/components/ChatComponents/ChatInputFollowup";
 import ChatInputTop from "@/components/ChatComponents/ChatInputTop";
 import ChatMessages from "@/components/ChatComponents/ChatMessages";
 import { ABORT_REASON, AI_SENDER, EVENT_NAMES, USER_SENDER } from "@/constants";
@@ -599,7 +599,7 @@ ${chatContent}`;
       <div className="bottom-container">
 
         {/* ChatInput component for user input */}
-        <ChatInput
+        <ChatInputFollowup
           inputMessage={inputMessageBottom}
           setInputMessage={setInputMessageBottom}
           handleSendMessage={handleSendMessage}

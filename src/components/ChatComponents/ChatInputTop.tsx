@@ -158,8 +158,8 @@ const ChatInputTop: React.FC<ChatInputProps> = ({
       <textarea
         ref={textAreaRef}
         className="chat-input-textarea"
-        placeholder="Ask anything. [[ for notes. / for custom prompts."
-        value={inputMessage}
+        placeholder="🤖🤯"
+        value={topInputMessage}
         onChange={handleInputChange}
         onKeyDown={handleKeyDown}
       />
