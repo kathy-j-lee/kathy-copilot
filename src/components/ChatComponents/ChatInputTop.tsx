@@ -154,7 +154,7 @@ const ChatInputTop: React.FC<ChatInputProps> = ({
   };
 
   return (
-    <div className="chat-input-container" ref={containerRef}>
+    <div className="chat-top-input-container" ref={containerRef}>
       <textarea
         ref={textAreaRef}
         className="chat-input-textarea"

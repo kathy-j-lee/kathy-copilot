@@ -1,7 +1,7 @@
 import ChainManager from "@/LLMProviders/chainManager";
 import { useAIState } from "@/aiState";
 import { updateChatMemory } from "@/chatUtils";
-import ChatIcons from "@/components/ChatComponents/ChatIcons";
+import ChatSessionIcons from "@/components/ChatComponents/ChatSessionIcons";
 import ChatInput from "@/components/ChatComponents/ChatInput";
 import ChatInputTop from "@/components/ChatComponents/ChatInputTop";
 import ChatMessages from "@/components/ChatComponents/ChatMessages";
@@ -550,6 +550,28 @@ ${chatContent}`;
       <strong>YAY GO KATHY</strong>
     </div>
       <div className="top-container">
+        <ChatSessionIcons
+          currentModelKey={currentModelKey}
+          setCurrentModelKey={setModelKey}
+          onNewChat={async (openNote: boolean) => {
+            handleStopGenerating(ABORT_REASON.NEW_CHAT);
+            if (settings.autosaveChat && chatHistory.length > 0) {
+              await handleSaveAsNote(openNote);
+            }
+            clearMessages();
+            clearChatMemory();
+            clearCurrentAiMessage();
+          }}
+          onRefreshVaultContext={refreshVaultContext}
+          onFindSimilarNotes={(content, activeFilePath) =>
+            plugin.findSimilarNotes(content, activeFilePath)
+          }
+          addMessage={addMessage}
+          settings={settings}
+          vault={app.vault}
+          vault_qa_strategy={plugin.settings.indexVaultToVectorStore}
+          debug={debug}
+        />
         <ChatInputTop
             inputMessage={inputMessageTop}
             setInputMessage={setInputMessageTop}
@@ -561,32 +583,8 @@ ${chatContent}`;
             navigateHistory={navigateHistory}
             chatIsVisible={chatIsVisible}
           />
-                {/* ChatIcons component for chat controls */}
-                <ChatIcons
-          currentModelKey={currentModelKey}
-          setCurrentModelKey={setModelKey}
-          currentChain={currentChain}
-          setCurrentChain={setChain}
-          onNewChat={async (openNote: boolean) => {
-            handleStopGenerating(ABORT_REASON.NEW_CHAT);
-            if (settings.autosaveChat && chatHistory.length > 0) {
-              await handleSaveAsNote(openNote);
-            }
-            clearMessages();
-            clearChatMemory();
-            clearCurrentAiMessage();
-          }}
-          onSaveAsNote={() => handleSaveAsNote(true)}
-          onRefreshVaultContext={refreshVaultContext}
-          onFindSimilarNotes={(content, activeFilePath) =>
-            plugin.findSimilarNotes(content, activeFilePath)
-          }
-          addMessage={addMessage}
-          settings={settings}
-          vault={app.vault}
-          vault_qa_strategy={plugin.settings.indexVaultToVectorStore}
-          debug={debug}
-        />
+        {/* ChatIcons component for chat controls */}
+        
         </div>
       <ChatMessages
         chatHistory={chatHistory}

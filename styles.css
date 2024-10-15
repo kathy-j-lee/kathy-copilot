@@ -65,6 +65,17 @@ If your plugin does not need CSS, delete this file.
   padding: 10px; /* Add some padding for spacing */
 }
 
+
+.chat-container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  padding-left: 0px;
+  background-color: #fff;
+  overflow: hidden; /* Fix overflow and can't scroll up */
+}
+
 .top-container {
   display: flex;
   flex-direction: column;
@@ -74,14 +85,15 @@ If your plugin does not need CSS, delete this file.
   flex: 0 0 auto;
   box-sizing: border-box;
 }
-
-.chat-container {
+.chat-session-icons-container {
   display: flex;
-  flex-direction: column;
+  justify-content: left;
+  align-items: center;
   width: 100%;
-  height: 100%;
-  background-color: #fff;
-  overflow: hidden; /* Fix overflow and can't scroll up */
+  padding: 0px 8px 0;
+  order: 1;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 
 .bottom-container {
@@ -94,16 +106,6 @@ If your plugin does not need CSS, delete this file.
   box-sizing: border-box;
 }
 
-.chat-icons-container {
-  display: flex;
-  justify-content: left;
-  align-items: center;
-  width: 100%;
-  padding: 8px 8px 0;
-  order: 2;
-  gap: 8px;
-  flex-wrap: wrap;
-}
 
 .icon-scaler {
   transform: scale(1.6);
@@ -157,7 +159,6 @@ If your plugin does not need CSS, delete this file.
   box-sizing: border-box;
   flex-grow: 1;
   width: 100%;
-  order: 1;
   position: relative;
 }
 
