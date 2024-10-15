@@ -159,7 +159,7 @@ const ChatInputTop: React.FC<ChatInputProps> = ({
         ref={textAreaRef}
         className="chat-input-textarea"
         placeholder="🤖🤯"
-        value={topInputMessage}
+        value={inputMessage}
         onChange={handleInputChange}
         onKeyDown={handleKeyDown}
       />

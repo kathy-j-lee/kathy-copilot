@@ -95,11 +95,24 @@ const Chat: React.FC<ChatProps> = ({
 
   // Function to handle sending a message
   const handleSendMessage = async () => {
-    if (!inputMessageTop && !inputMessageBottom) return;
+    let messageToSend: string;
+    let isNewInteraction = false;
+
+    if (inputMessageTop && (chatHistory.length === 0 || inputMessageTop !== chatHistory[0].message)) {
+      // Use top input if it's the first message or if it has been modified
+      messageToSend = inputMessageTop;
+      isNewInteraction = true;
+    } else if (inputMessageBottom) {
+      // Use bottom input for follow-up messages
+      messageToSend = inputMessageBottom;
+    } else {
+      // No message to send
+      return;
+    }
 
     const customPromptProcessor = CustomPromptProcessor.getInstance(app.vault, settings);
     const processedUserMessage = await customPromptProcessor.processCustomPrompt(
-      inputMessageTop || inputMessageBottom,
+      messageToSend,
       "",
       app.workspace.getActiveFile() as TFile | undefined
     );
@@ -107,7 +120,7 @@ const Chat: React.FC<ChatProps> = ({
     const timestamp = formatDateTime(new Date());
 
     const userMessage: ChatMessage = {
-      message: inputMessageTop || inputMessageBottom,
+      message: messageToSend,
       sender: USER_SENDER,
       isVisible: true,
       timestamp: timestamp,
@@ -120,28 +133,50 @@ const Chat: React.FC<ChatProps> = ({
       timestamp: timestamp,
     };
 
+    if (isNewInteraction) {
+      // Clear chat history and memory for new interaction
+      clearMessages();
+      clearChatMemory();
+    }
+
     // Add user message to chat history
     addMessage(userMessage);
     addMessage(promptMessageHidden);
 
     // Add to user message history
-    updateUserMessageHistory(inputMessageTop || inputMessageBottom);
+    updateUserMessageHistory(messageToSend);
     setHistoryIndex(-1);
 
-    // Clear input
-    setInputMessageBottom("");
+    // Clear only the bottom input
+    if (!isNewInteraction) {
+      setInputMessageBottom("");
+    }
 
     // Display running dots to indicate loading
     setLoading(true);
-    await getAIResponse(
-      promptMessageHidden,
-      chainManager,
-      addMessage,
-      setCurrentAiMessage,
-      setAbortController,
-      { debug }
-    );
-    setLoading(false);
+    
+    const newAbortController = new AbortController();
+    setAbortController(newAbortController);
+
+    try {
+      await getAIResponse(
+        promptMessageHidden,
+        chainManager,
+        addMessage,
+        setCurrentAiMessage,
+        setAbortController,
+        { debug }
+      );
+    } catch (error) {
+      if (error.name === 'AbortError') {
+        console.log('AI response generation was aborted');
+      } else {
+        console.error('Error generating AI response:', error);
+      }
+    } finally {
+      setLoading(false);
+      setAbortController(null);
+    }
   };
 
   // Function to navigate through message history

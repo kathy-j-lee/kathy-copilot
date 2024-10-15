@@ -18,7 +18,7 @@ interface ChatInputProps {
   navigateHistory: (direction: "up" | "down") => string;
 }
 
-const ChatInput: React.FC<ChatInputProps> = ({
+const ChatInputFollowup: React.FC<ChatInputProps> = ({
   inputMessage,
   setInputMessage,
   handleSendMessage,
@@ -37,7 +37,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
 
   const handleInputChange = async (event: React.ChangeEvent<HTMLTextAreaElement>) => {
     const inputValue = event.target.value;
-    setInputMessage(inputValue);
+    setInputMessage(inputValue); // Use setInputMessage from props
     adjustTextareaHeight();
 
     if (inputValue.slice(-2) === "[[") {
@@ -158,7 +158,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
       <textarea
         ref={textAreaRef}
         className="chat-input-textarea"
-        placeholder="Ask anything. [[ for notes. / for custom prompts."
+        placeholder="Ask follow up."
         value={inputMessage}
         onChange={handleInputChange}
         onKeyDown={handleKeyDown}
@@ -173,4 +173,4 @@ const ChatInput: React.FC<ChatInputProps> = ({
   );
 };
 
-export default ChatInput;
+export default ChatInputFollowup;
