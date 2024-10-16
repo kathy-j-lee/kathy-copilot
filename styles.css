@@ -277,7 +277,7 @@ If your plugin does not need CSS, delete this file.
 }
 
 .chat-message-user .message-content {
-  background-color: var(--interactive-accent-hsl);
+  background-color: hsla(var(--interactive-accent-hsl), 0.9);
   color: var(--text-on-accent);
 }
 
