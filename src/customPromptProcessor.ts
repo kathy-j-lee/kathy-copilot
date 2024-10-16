@@ -188,6 +188,18 @@ export class CustomPromptProcessor {
     return variablesWithContent;
   }
 
+  /**
+   * Processes a custom prompt by:
+   * 1. Extracting variables from the prompt
+   * 2. Handling selected text or active note content
+   * 3. Processing note titles in [[]] syntax
+   * 4. Combining all information into a final processed prompt
+   * 
+   * @param customPrompt - The original custom prompt to process
+   * @param selectedText - The text currently selected by the user
+   * @param activeNote - The currently active note file
+   * @returns A promise that resolves to the processed prompt string
+   */
   async processCustomPrompt(
     customPrompt: string,
     selectedText: string,
@@ -223,7 +235,7 @@ export class CustomPromptProcessor {
       }
     }
 
-    // Process [[note title]] syntax only for those not already processed
+    // Process [[note title]] syntax
     const noteTitles = extractNoteTitles(processedPrompt);
     for (const noteTitle of noteTitles) {
       // Check if this note title wasn't already processed in extractVariablesFromPrompt
