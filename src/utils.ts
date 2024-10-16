@@ -8,15 +8,18 @@ import { BaseChain, RetrievalQAChain } from "langchain/chains";
 import moment from "moment";
 import { TFile, Vault, parseYaml } from "obsidian";
 
+// Function to extract the model name from a given model key
 export const getModelNameFromKey = (modelKey: string): string => {
   return modelKey.split("|")[0];
 };
 
+// Function to check if a file path matches a given input path
 export const isFolderMatch = (fileFullpath: string, inputPath: string): boolean => {
   const fileSegments = fileFullpath.split("/").map((segment) => segment.toLowerCase());
   return fileSegments.includes(inputPath.toLowerCase());
 };
 
+// Function to retrieve a note file from the vault by its title
 export async function getNoteFileFromTitle(vault: Vault, noteTitle: string): Promise<TFile | null> {
   // Get all markdown files in the vault
   const files = vault.getMarkdownFiles();
@@ -36,6 +39,24 @@ export async function getNoteFileFromTitle(vault: Vault, noteTitle: string): Pro
   return null;
 }
 
+// Function to extract headers from a note by its title
+export async function getHeadersFromNote(vault: Vault, noteTitle: string): Promise<string[]> {
+  const file = await getNoteFileFromTitle(vault, noteTitle);
+
+  if (!file) {
+    return [];
+  }
+
+  const content = await vault.cachedRead(file);
+
+  // Extract headers
+  const headers = content.split("\n").filter(line => line.startsWith("#"));
+  
+  // Return the headers list
+  return headers;
+}
+
+// Function to get notes from a specific path in the vault
 export const getNotesFromPath = async (vault: Vault, path: string): Promise<TFile[]> => {
   const files = vault.getMarkdownFiles();
 
@@ -71,6 +92,7 @@ export const getNotesFromPath = async (vault: Vault, path: string): Promise<TFil
   });
 };
 
+// Function to extract tags from a note's frontmatter
 export async function getTagsFromNote(file: TFile, vault: Vault): Promise<string[]> {
   const fileContent = await vault.cachedRead(file);
   // Check if the file starts with frontmatter delimiter
@@ -95,6 +117,7 @@ export async function getTagsFromNote(file: TFile, vault: Vault): Promise<string
   return [];
 }
 
+// Function to get notes that contain specific tags
 export async function getNotesFromTags(
   vault: Vault,
   tags: string[],
@@ -120,6 +143,7 @@ export async function getNotesFromTags(
   return filesWithTag;
 }
 
+// Function to check if a file path is in a list of paths
 export function isPathInList(filePath: string, pathList: string): boolean {
   if (!pathList) return false;
 
@@ -153,6 +177,7 @@ export function isPathInList(filePath: string, pathList: string): boolean {
     });
 }
 
+// Function to convert a string to a ChainType enum
 export const stringToChainType = (chain: string): ChainType => {
   switch (chain) {
     case "llm_chain":
@@ -166,22 +191,24 @@ export const stringToChainType = (chain: string): ChainType => {
   }
 };
 
+// Type guard to check if a chain is an LLM chain
 export const isLLMChain = (chain: RunnableSequence): chain is RunnableSequence => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return (chain as any).last.bound.modelName || (chain as any).last.bound.model;
 };
 
+// Type guard to check if a chain is a Retrieval QA chain
 export const isRetrievalQAChain = (chain: BaseChain): chain is RetrievalQAChain => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return (chain as any).last.bound.retriever !== undefined;
 };
 
+// Function to check if a chain is supported (either LLM or Retrieval QA)
 export const isSupportedChain = (chain: RunnableSequence): chain is RunnableSequence => {
   return isLLMChain(chain) || isRetrievalQAChain(chain);
 };
 
-// Returns the last N messages from the chat history,
-// last one being the newest ai message
+// Function to get the last N messages from chat history
 export const getChatContext = (chatHistory: ChatMessage[], contextSize: number) => {
   if (chatHistory.length === 0) {
     return [];
@@ -200,12 +227,14 @@ export const getChatContext = (chatHistory: ChatMessage[], contextSize: number) 
   return chatHistory.slice(startIndex, lastIndex + 1);
 };
 
+// Interface for formatted date and time
 export interface FormattedDateTime {
   fileName: string;
   display: string;
   epoch: number;
 }
 
+// Function to format a date and time
 export const formatDateTime = (
   now: Date,
   timezone: "local" | "utc" = "local"
@@ -223,6 +252,7 @@ export const formatDateTime = (
   };
 };
 
+// Function to convert a string timestamp to a formatted date and time
 export function stringToFormattedDateTime(timestamp: string): FormattedDateTime {
   const date = moment(timestamp, "YYYY/MM/DD HH:mm:ss");
   if (!date.isValid()) {
@@ -236,15 +266,18 @@ export function stringToFormattedDateTime(timestamp: string): FormattedDateTime 
   };
 }
 
+// Function to get the content of a file
 export async function getFileContent(file: TFile, vault: Vault): Promise<string | null> {
   if (file.extension != "md") return null;
   return await vault.cachedRead(file);
 }
 
+// Function to get the name of a file
 export function getFileName(file: TFile): string {
   return file.basename;
 }
 
+// Function to get the content of all notes in the vault
 export async function getAllNotesContent(vault: Vault): Promise<string> {
   let allContent = "";
 
@@ -258,6 +291,7 @@ export async function getAllNotesContent(vault: Vault): Promise<string> {
   return allContent;
 }
 
+// Function to check if two embedding models are the same
 export function areEmbeddingModelsSame(
   model1: string | undefined,
   model2: string | undefined
@@ -276,6 +310,7 @@ export function areEmbeddingModelsSame(
   return model1 === model2;
 }
 
+// Function to sanitize settings by converting string values to numbers
 export function sanitizeSettings(settings: CopilotSettings): CopilotSettings {
   const sanitizedSettings: CopilotSettings = { ...settings };
 
@@ -294,7 +329,7 @@ export function sanitizeSettings(settings: CopilotSettings): CopilotSettings {
   return sanitizedSettings;
 }
 
-// Basic prompts
+// Function to generate a prompt for sending notes content
 export function sendNotesContentPrompt(notes: { name: string; content: string }[]): string {
   const formattedNotes = notes.map((note) => `## ${note.name}\n\n${note.content}`).join("\n\n");
 
@@ -309,6 +344,7 @@ export function sendNotesContentPrompt(notes: { name: string; content: string }[
   );
 }
 
+// Function to get note title and tags
 function getNoteTitleAndTags(noteWithTag: {
   name: string;
   content: string;
@@ -320,6 +356,7 @@ function getNoteTitleAndTags(noteWithTag: {
   );
 }
 
+// Function to get chat context string
 function getChatContextStr(chatNoteContextPath: string, chatNoteContextTags: string[]): string {
   const pathStr = chatNoteContextPath ? `\nChat context by path: ${chatNoteContextPath}` : "";
   const tagsStr =
@@ -327,6 +364,7 @@ function getChatContextStr(chatNoteContextPath: string, chatNoteContextTags: str
   return pathStr + tagsStr;
 }
 
+// Function to generate a prompt for sending chat context notes
 export function getSendChatContextNotesPrompt(
   notes: { name: string; content: string }[],
   chatNoteContextPath: string,
@@ -340,6 +378,7 @@ export function getSendChatContextNotesPrompt(
   );
 }
 
+// Function to generate a prompt to fix grammar and spelling
 export function fixGrammarSpellingSelectionPrompt(selectedText: string): string {
   return (
     `Please fix the grammar and spelling of the following text and return it without any other changes:\n\n` +
@@ -347,6 +386,7 @@ export function fixGrammarSpellingSelectionPrompt(selectedText: string): string 
   );
 }
 
+// Function to generate a prompt to summarize text
 export function summarizePrompt(selectedText: string): string {
   return (
     `Summarize the following text into bullet points and return it without any other changes. Identify the input language, and return the summary in the same language. If the input is English, return the summary in English. Otherwise, return in the same language as the input. Return ONLY the summary, DO NOT return the name of the language:\n\n` +
@@ -354,6 +394,7 @@ export function summarizePrompt(selectedText: string): string {
   );
 }
 
+// Function to generate a prompt to create a table of contents
 export function tocPrompt(selectedText: string): string {
   return (
     `Please generate a table of contents for the following text and return it without any other changes. Output in the same language as the source, do not output English if it is not English:\n\n` +
@@ -361,6 +402,7 @@ export function tocPrompt(selectedText: string): string {
   );
 }
 
+// Function to generate a prompt to create a glossary
 export function glossaryPrompt(selectedText: string): string {
   return (
     `Please generate a glossary for the following text and return it without any other changes. Output in the same language as the source, do not output English if it is not English:\n\n` +
@@ -368,6 +410,7 @@ export function glossaryPrompt(selectedText: string): string {
   );
 }
 
+// Function to generate a prompt to simplify text
 export function simplifyPrompt(selectedText: string): string {
   return (
     `Please simplify the following text so that a 6th-grader can understand. Output in the same language as the source, do not output English if it is not English:\n\n` +
@@ -375,6 +418,7 @@ export function simplifyPrompt(selectedText: string): string {
   );
 }
 
+// Function to generate a prompt to add emojis to text
 export function emojifyPrompt(selectedText: string): string {
   return (
     `Please insert emojis to the following content without changing the text.` +
@@ -383,6 +427,7 @@ export function emojifyPrompt(selectedText: string): string {
   );
 }
 
+// Function to generate a prompt to remove URLs from text
 export function removeUrlsFromSelectionPrompt(selectedText: string): string {
   return (
     `Please remove all URLs from the following text and return it without any other changes:\n\n` +
@@ -390,11 +435,13 @@ export function removeUrlsFromSelectionPrompt(selectedText: string): string {
   );
 }
 
+// Function to generate a prompt to rewrite text as a tweet
 export function rewriteTweetSelectionPrompt(selectedText: string): string {
   return `Please rewrite the following content to under 280 characters using simple sentences. Output in the same language as the source, do not output English if it is not English. Please follow the instruction strictly. Content:\n
     + ${selectedText}`;
 }
 
+// Function to generate a prompt to rewrite text as a tweet thread
 export function rewriteTweetThreadSelectionPrompt(selectedText: string): string {
   return (
     `Please follow the instructions closely step by step and rewrite the content to a thread. ` +
@@ -407,6 +454,7 @@ export function rewriteTweetThreadSelectionPrompt(selectedText: string): string 
   );
 }
 
+// Function to generate a prompt to rewrite text to be shorter
 export function rewriteShorterSelectionPrompt(selectedText: string): string {
   return (
     `Please rewrite the following text to make it half as long while keeping the meaning as much as possible. Output in the same language as the source, do not output English if it is not English:\n` +
@@ -414,6 +462,7 @@ export function rewriteShorterSelectionPrompt(selectedText: string): string {
   );
 }
 
+// Function to generate a prompt to rewrite text to be longer
 export function rewriteLongerSelectionPrompt(selectedText: string): string {
   return (
     `Please rewrite the following text to make it twice as long while keeping the meaning as much as possible. Output in the same language as the source, do not output English if it is not English:\n` +
@@ -421,6 +470,7 @@ export function rewriteLongerSelectionPrompt(selectedText: string): string {
   );
 }
 
+// Function to generate a prompt to explain text like to a 5-year-old
 export function eli5SelectionPrompt(selectedText: string): string {
   return (
     `Please explain the following text like I'm 5 years old. Output in the same language as the source, do not output English if it is not English:\n\n` +
@@ -428,6 +478,7 @@ export function eli5SelectionPrompt(selectedText: string): string {
   );
 }
 
+// Function to generate a prompt to rewrite text as a press release
 export function rewritePressReleaseSelectionPrompt(selectedText: string): string {
   return (
     `Please rewrite the following text to make it sound like a press release. Output in the same language as the source, do not output English if it is not English:\n\n` +
@@ -435,12 +486,14 @@ export function rewritePressReleaseSelectionPrompt(selectedText: string): string
   );
 }
 
+// Function to create a prompt for translating text
 export function createTranslateSelectionPrompt(language?: string) {
   return (selectedText: string): string => {
     return `Please translate the following text to ${language}:\n\n` + `${selectedText}`;
   };
 }
 
+// Function to create a prompt to change the tone of text
 export function createChangeToneSelectionPrompt(tone?: string) {
   return (selectedText: string): string => {
     return (
@@ -450,6 +503,7 @@ export function createChangeToneSelectionPrompt(tone?: string) {
   };
 }
 
+// Function to extract chat history from memory variables
 export function extractChatHistory(memoryVariables: MemoryVariables): [string, string][] {
   const chatHistory: [string, string][] = [];
   const { history } = memoryVariables;
@@ -463,6 +517,7 @@ export function extractChatHistory(memoryVariables: MemoryVariables): [string, s
   return chatHistory;
 }
 
+// Function to extract note titles from a query
 export function extractNoteTitles(query: string): string[] {
   // Use a regular expression to extract note titles wrapped in [[]]
   const regex = /\[\[(.*?)\]\]/g;
@@ -489,6 +544,7 @@ export function processVariableNameForNotePath(variableName: string): string {
   return variableName;
 }
 
+// Function to extract unique titles from documents
 export function extractUniqueTitlesFromDocs(docs: Document[]): string[] {
   const titlesSet = new Set<string>();
   docs.forEach((doc) => {
