@@ -98,6 +98,11 @@ const Chat: React.FC<ChatProps> = ({
     let messageToSend: string;
     let isNewInteraction = false;
 
+    // Check if there's a message in the top input and if it's a new interaction
+    // A new interaction is defined as either:
+    // 1. The chat history is empty (first message of the conversation)
+    // 2. The top input message is different from the first message in the chat history
+    // This allows users to modify their initial query and start a new interaction
     if (inputMessageTop && (chatHistory.length === 0 || inputMessageTop !== chatHistory[0].message)) {
       // Use top input if it's the first message or if it has been modified
       messageToSend = inputMessageTop;
@@ -111,6 +116,7 @@ const Chat: React.FC<ChatProps> = ({
     }
 
     const customPromptProcessor = CustomPromptProcessor.getInstance(app.vault, settings);
+    
     const processedUserMessage = await customPromptProcessor.processCustomPrompt(
       messageToSend,
       "",

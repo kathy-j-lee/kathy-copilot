@@ -8,6 +8,8 @@ import { BaseChain, RetrievalQAChain } from "langchain/chains";
 import moment from "moment";
 import { TFile, Vault, parseYaml } from "obsidian";
 
+import MarkdownIt from 'markdown-it';
+
 // Function to extract the model name from a given model key
 export const getModelNameFromKey = (modelKey: string): string => {
   return modelKey.split("|")[0];
@@ -267,9 +269,69 @@ export function stringToFormattedDateTime(timestamp: string): FormattedDateTime 
 }
 
 // Function to get the content of a file
-export async function getFileContent(file: TFile, vault: Vault): Promise<string | null> {
-  if (file.extension != "md") return null;
-  return await vault.cachedRead(file);
+export async function getFileContent(
+  noteFile: TFile,
+  vault: Vault,
+  heading?: string
+): Promise<string | null> {
+  if (noteFile.extension !== "md") return null;
+
+  let content = await vault.cachedRead(noteFile);
+
+  if (heading) {
+    const headingContent = await getHeadingContent(content, heading);
+    if (headingContent) {
+      content = headingContent;
+    }
+  }
+
+  console.log('content returned from getFileContent:\n', content);
+  return content;
+}
+
+export async function getHeadingContent(content: string, heading: string): Promise<string | null> {
+  console.log(
+      `*** GET HEADING CONTENT ***\n` +
+      `content: \n${content}\n` +
+      `heading: ${heading}`
+  );
+
+  const md = new MarkdownIt();
+  const tokens = md.parse(content, {}); // Parse the content into tokens
+  let extracting = false;
+  let extractedContent = '';
+  let headerDepth = 0;
+  let skipNextInline = false;
+
+  for (const token of tokens) {
+    if (token.type === 'heading_open') {
+      const nextToken = tokens[tokens.indexOf(token) + 1];
+      if (nextToken && nextToken.type === 'inline' && nextToken.content === heading) {
+        extracting = true;
+        headerDepth = parseInt(token.tag.slice(1), 10);
+        extractedContent = `${token.markup} ${nextToken.content}\n`; // Start with the main heading
+        skipNextInline = true; // Skip the next inline token as we've already processed it
+      } else if (extracting) {
+        const currentDepth = parseInt(token.tag.slice(1), 10);
+        if (currentDepth <= headerDepth) {
+          break; // Stop when we reach the next header of the same or higher level
+        }
+        extractedContent += `${token.markup} `; // Add the subheading markup
+      }
+    } else if (extracting) {
+      if (token.type === 'inline' && !skipNextInline) {
+        extractedContent += `${token.content}\n`;
+      } else if (token.type === 'paragraph_open') {
+        // Do nothing, we'll add content with the inline token
+      } else if (token.type === 'paragraph_close') {
+        extractedContent += '\n'; // Add an extra line break after paragraphs
+      }
+      skipNextInline = false;
+    }
+  }
+
+  console.log("extracted heading content:\n", extractedContent);
+  return extractedContent.trim() || null;
 }
 
 // Function to get the name of a file

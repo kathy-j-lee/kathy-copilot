@@ -1,6 +1,6 @@
 import { CustomPrompt, CustomPromptProcessor } from "@/customPromptProcessor";
 import { CopilotSettings } from "@/settings/SettingsPage";
-import { extractNoteTitles, getFileContent, getNoteFileFromTitle, getNotesFromPath } from "@/utils";
+import { extractNoteTitles, getFileContent, getHeadingContent, getNoteFileFromTitle, getNotesFromPath } from "@/utils";
 import { Notice, TFile, Vault } from "obsidian";
 
 // Mock Obsidian
@@ -15,6 +15,7 @@ jest.mock("@/utils", () => ({
   extractNoteTitles: jest.fn().mockReturnValue([]),
   getNoteFileFromTitle: jest.fn(),
   getFileContent: jest.fn(),
+  getHeadingContent: jest.fn(),
   getFileName: jest.fn(),
   getNotesFromPath: jest.fn(),
   getNotesFromTags: jest.fn(),
@@ -187,6 +188,37 @@ describe("CustomPromptProcessor", () => {
 
     expect(result).toContain("Content of [[Test Note]] is important.");
     expect(result).toContain("[[Test Note]]:\n\nTest note content");
+  });
+
+  it("should process [[note#header]] syntax correctly", async () => {
+    const customPrompt = "Content of [[Test Note#Section 1]] is important.";
+    const selectedText = "";
+
+    // Mock the necessary functions
+    (extractNoteTitles as jest.Mock).mockReturnValue(["Test Note#Section 1"]);
+    (getNoteFileFromTitle as jest.Mock).mockResolvedValue({} as TFile);
+    (getFileContent as jest.Mock).mockResolvedValue(
+      "# Section 1\nThis is the content of Section 1.\n\n# Section 2\nThis is the content of Section 2."
+    );
+
+    // Call getHeadingContent directly and log its output
+    console.log("Calling getHeadingContent directly:");
+    const headerContent = await getHeadingContent(
+      "# Section 1\nThis is the content of Section 1.\n\n# Section 2\nThis is the content of Section 2.",
+      "Section 1"
+    );
+    console.log("headerContent:", headerContent);
+
+    const result = await processor.processCustomPrompt(customPrompt, selectedText, mockActiveNote);
+
+    console.log("processCustomPrompt result:", result);
+
+    expect(result).toContain("Content of [[Test Note#Section 1]] is important.");
+    expect(result).toContain("[[Test Note#Section 1]]:\n\nThis is the content of Section 1.");
+    expect(result).not.toContain("# Section 2");
+
+    // Additional assertions for getHeaderContent
+    expect(headerContent).toBe("This is the content of Section 1.");
   });
 
   it("should process {[[note title]]} syntax correctly without duplication", async () => {
@@ -363,4 +395,5 @@ describe("CustomPromptProcessor", () => {
     expect(result).toContain("selectedText:\n\n This is the selected text");
     expect(result).not.toContain("Content of the active note");
   });
+
 });

@@ -10,6 +10,7 @@ import {
   getNotesFromTags,
   processVariableNameForNotePath,
 } from "@/utils";
+import { match } from "assert";
 import { normalizePath, Notice, TFile, Vault } from "obsidian";
 
 export interface CustomPrompt {
@@ -125,10 +126,17 @@ export class CustomPromptProcessor {
   }
 
   /**
-   * Extract variables and get their content.
-   *
-   * @param {CustomPrompt} doc - the custom prompt to process
-   * @return {Promise<string[]>} the processed custom prompt
+   * Extracts variables from a custom prompt and retrieves their content.
+   * 
+   * This function processes a custom prompt string, identifying variables enclosed in curly braces {},
+   * and fetches the corresponding content for each variable. It handles different types of variables:
+   * - {activeNote}: Content of the currently active note
+   * - {#tag1,#tag2,...}: Content of notes with specified tags
+   * - {path/to/note}: Content of notes matching the specified path
+   * 
+   * @param {string} customPrompt - The custom prompt string containing variables to extract
+   * @param {TFile} [activeNote] - The currently active note file (optional)
+   * @returns {Promise<string[]>} An array of strings, each containing the content for a matched variable
    */
   public async extractVariablesFromPrompt(
     customPrompt: string,
@@ -138,8 +146,14 @@ export class CustomPromptProcessor {
     const variableRegex = /\{([^}]+)\}/g;
     let match;
 
+    console.log(
+      `*** EXTRACT VARIABLES FROM PROMPT ***\n` +
+      `prompt: ${customPrompt}`
+    )
+    // matching curly braces only {}
     while ((match = variableRegex.exec(customPrompt)) !== null) {
       const variableName = match[1].trim();
+      
       const notes = [];
 
       if (variableName.toLowerCase() === "activenote") {
@@ -169,6 +183,7 @@ export class CustomPromptProcessor {
         const noteFiles = await getNotesFromPath(this.vault, processedVariableName);
         for (const file of noteFiles) {
           const content = await getFileContent(file, this.vault);
+          console.log('note content:', content)
           if (content) {
             notes.push({ name: getFileName(file), content });
           }
@@ -205,8 +220,15 @@ export class CustomPromptProcessor {
     selectedText: string,
     activeNote?: TFile
   ): Promise<string> {
+
+    console.log(
+      `*** PROCESS CUSTOM PROMPT ***`
+    )
+
     const variablesWithContent = await this.extractVariablesFromPrompt(customPrompt, activeNote);
     let processedPrompt = customPrompt;
+
+    // Extract all variable matches (enclosed in {}) from the processed prompt
     const matches = [...processedPrompt.matchAll(/\{([^}]+)\}/g)];
 
     let additionalInfo = "";
@@ -236,13 +258,30 @@ export class CustomPromptProcessor {
     }
 
     // Process [[note title]] syntax
+    // This is where getHeaderContent has to get called, i think
+    console.log('extract note titles from processed prompt:', processedPrompt)
     const noteTitles = extractNoteTitles(processedPrompt);
+    let noteHeading: string | undefined;
+
     for (const noteTitle of noteTitles) {
       // Check if this note title wasn't already processed in extractVariablesFromPrompt
       if (!matches.some((match) => match[1].includes(`[[${noteTitle}]]`))) {
-        const noteFile = await getNoteFileFromTitle(this.vault, noteTitle);
+
+        // Process header if noteTitle contains '#'
+        let parsedNoteTitle = noteTitle;
+        if (noteTitle.includes('#')) {
+          const [titlePart, headingPart] = noteTitle.split('#').map(part => part.trim());
+          parsedNoteTitle = titlePart;
+          noteHeading = headingPart;
+        }
+        console.log('note title passed to getNoteFileFromTitle:', parsedNoteTitle)
+        console.log('note heading:', noteHeading)
+
+        const noteFile = await getNoteFileFromTitle(this.vault, parsedNoteTitle);
         if (noteFile) {
-          const noteContent = await getFileContent(noteFile, this.vault);
+          console.log('getting note content for: ', parsedNoteTitle)
+          const noteContent = await getFileContent(noteFile, this.vault, noteHeading);
+          console.log('note content returned:\n', noteContent)
           additionalInfo += `\n\n[[${noteTitle}]]:\n\n${noteContent}`;
         }
       }
