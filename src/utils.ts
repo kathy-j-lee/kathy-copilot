@@ -277,11 +277,6 @@ export async function getFileContent(
   if (noteFile.extension !== "md") return null;
 
   let content = await vault.cachedRead(noteFile);
-  console.log('Original content:\n', content);
-
-  // Remove front matter more robustly
-  content = content.replace(/^---\s*\n(?:.*\n)*?---\s*\n/, '');
-  console.log('Content after frontmatter removal:\n', content);
 
   if (heading) {
     const headingContent = await getHeadingContent(content, heading);
@@ -290,7 +285,7 @@ export async function getFileContent(
     }
   }
 
-  console.log('Final content returned from getFileContent:\n', content);
+  console.log('content returned from getFileContent:\n', content);
   return content;
 }
 
