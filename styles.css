@@ -239,7 +239,7 @@ If your plugin does not need CSS, delete this file.
   width: 100%;
   word-wrap: break-word;
   overflow-wrap: break-word;
-  /* font-size: calc(var(--font-text-size) - 1px);*/
+  font-size: calc(var(--font-text-size) - 1px);
   box-sizing: border-box;
   scroll-behavior: smooth;
   margin-top: auto;
