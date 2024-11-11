@@ -1,13 +1,8 @@
 {
-  "id": "copilot",
-  "name": "Copilot",
+  "id": "kjl-copilot",
+  "name": "kjl copilot",
   "version": "2.6.11",
   "minAppVersion": "0.15.0",
   "description": "A ChatGPT Copilot in Obsidian.",
-  "author": "Kathy Lee",
-  "authorUrl": "https://twitter.com/logancyang",
-  "fundingUrl": {
-    "Buy Me a Coffee": "https://www.buymeacoffee.com/logancyang",
-    "GitHub Sponsor": "https://github.com/sponsors/logancyang"
-  }
+  "author": "Kathy Lee"
 }
